@@ -107,13 +107,13 @@ img, svg { display: block; max-width: 100%; }
   -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
   mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
 }
-.bg-mesh { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; filter: blur(60px); }
+.bg-mesh { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; filter: blur(40px); will-change: auto; }
 .bg-mesh span {
   position: absolute; width: 460px; height: 460px; border-radius: 50%;
   opacity: .22; will-change: transform;
 }
-.bg-mesh span:nth-child(1) { background: radial-gradient(circle, var(--gold), transparent); top: -10%; left: -10%; animation: drift 26s ease-in-out infinite; }
-.bg-mesh span:nth-child(2) { background: radial-gradient(circle, #7a5d12, transparent); bottom: -10%; right: -10%; animation: drift 32s ease-in-out infinite reverse; }
+.bg-mesh span:nth-child(1) { background: radial-gradient(circle, var(--gold), transparent); top: -10%; left: -10%; animation: drift 60s ease-in-out infinite; }
+.bg-mesh span:nth-child(2) { background: radial-gradient(circle, #7a5d12, transparent); bottom: -10%; right: -10%; animation: drift 75s ease-in-out infinite reverse; }
 .bg-mesh span:nth-child(3) { display: none; }
 @keyframes drift {
   0%,100% { transform: translate(0,0); }
@@ -769,19 +769,10 @@ section { padding: 120px 0; }
 .footer__cols p, .footer__cols a { color: var(--text-dim); display: block; margin-bottom: 6px; font-size: 14px; transition: color .25s; }
 .footer__cols a:hover { color: var(--gold); }
 .footer__bottom {
-  margin-top: 60px; padding-top: 24px; padding-right: 80px;
+  margin-top: 60px; padding-top: 24px;
   border-top: .8px solid var(--gold-line);
   color: var(--text-dim); font-size: 13px;
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
 }
-.lite-toggle {
-  background: transparent; border: 1px solid var(--gold-soft);
-  color: var(--gold); padding: 6px 14px; border-radius: 999px;
-  font-size: 12px; cursor: pointer; transition: background .25s;
-  font-family: inherit;
-}
-.lite-toggle:hover { background: rgba(212,175,55,.1); }
-.lite .lite-toggle::before { content: '✓ '; }
 
 /* ===== Back to top ===== */
 .back-top {

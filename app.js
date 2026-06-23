@@ -12,17 +12,24 @@ const SLOW_CONN = /(2g|slow-2g)/.test(navigator.connection?.effectiveType || '')
 const LOW_MEM = (navigator.deviceMemory || 8) <= 4;
 const LOW_CORE = (navigator.hardwareConcurrency || 8) <= 6;
 const LOW_END = LOW_CORE || LOW_MEM || NARROW || SAVE_DATA || SLOW_CONN || PRM;
-// Лайт-режим — полностью убираем дорогостоящие эффекты (blur, particles, custom cursor, tilt и т.д.)
 const LITE = LOW_END;
 if (LITE) document.documentElement.classList.add('lite');
-// Ручное переключение через localStorage флаг (на случай ошибки автодетекта)
-try { if (localStorage.getItem('forceLite') === '1') document.documentElement.classList.add('lite'); } catch(e) {}
-window.toggleLite = () => {
-  const on = !document.documentElement.classList.contains('lite');
-  document.documentElement.classList.toggle('lite', on);
-  try { localStorage.setItem('forceLite', on ? '1' : '0'); } catch(e) {}
-  location.reload();
-};
+
+/* ===== Runtime FPS monitor ===== */
+// Если железо вроде мощное, но рендер идёт <40fps первые 1.5 секунды — переключаемся в лайт
+(() => {
+  if (LITE) return;
+  let frames = 0, t0 = 0, raf;
+  const tick = (now) => {
+    if (!t0) t0 = now;
+    frames++;
+    const elapsed = now - t0;
+    if (elapsed < 1500) { raf = requestAnimationFrame(tick); return; }
+    const fps = (frames / elapsed) * 1000;
+    if (fps < 40) document.documentElement.classList.add('lite');
+  };
+  requestAnimationFrame(tick);
+})();
 const escapeHTML = (s) => String(s).replace(/[&<>"'/]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;'}[c]));
 const rafThrottle = (fn) => { let t = false; return (...a) => { if (t) return; t = true; requestAnimationFrame(() => { fn(...a); t = false; }); }; };
 

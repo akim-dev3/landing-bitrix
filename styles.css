@@ -655,7 +655,9 @@ section { padding: 120px 0; }
   font-family: var(--display);
   font-size: 24px; font-weight: 700; color: var(--gold);
   letter-spacing: .04em;
+  width: max-content;
 }
+.marquee__track > span { flex: 0 0 auto; min-width: max-content; }
 .marquee__track span:nth-child(even) { color: var(--text-dim); }
 @keyframes marquee { to { transform: translateX(-50%); } }
 

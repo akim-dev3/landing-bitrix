@@ -77,8 +77,10 @@ if (HOVER && !PRM) (() => {
   if (!('IntersectionObserver' in window)) { els.forEach(el => el.classList.add('is-visible')); return; }
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
-  }, { threshold: 0.12 });
+  }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
   els.forEach(el => io.observe(el));
+  // Страховка: если из-за быстрого скролла что-то не сработало — показываем спустя 3с
+  setTimeout(() => els.forEach(el => el.classList.add('is-visible')), 3000);
 })();
 
 /* ===== Counter animation ===== */

@@ -143,12 +143,10 @@ section { overflow-x: clip; }
 }
 .logo { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .04em; font-family: var(--display); min-width: 0; }
 .logo__mark {
-  width: 48px; height: 48px; border-radius: 50%;
-  object-fit: cover; object-position: center;
-  background: #0b0b0b;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: #0b0b0b url('logo.jpg?v=2') center/cover no-repeat;
   box-shadow: 0 0 24px rgba(212,175,55,.35);
   flex-shrink: 0;
-  image-rendering: -webkit-optimize-contrast;
   display: block;
 }
 .logo__text { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

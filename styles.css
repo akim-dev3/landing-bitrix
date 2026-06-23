@@ -143,10 +143,13 @@ section { overflow-x: clip; }
 }
 .logo { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .04em; font-family: var(--display); min-width: 0; }
 .logo__mark {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: #0b0b0b url('logo.jpg') center/cover no-repeat;
+  width: 48px; height: 48px; border-radius: 50%;
+  object-fit: cover; object-position: center;
+  background: #0b0b0b;
   box-shadow: 0 0 24px rgba(212,175,55,.35);
   flex-shrink: 0;
+  image-rendering: -webkit-optimize-contrast;
+  display: block;
 }
 .logo__text { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .logo__dot { color: var(--gold); }
@@ -603,16 +606,22 @@ section { padding: 120px 0; }
 .reviews__slider {
   position: relative; overflow: hidden;
   border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: .8px solid var(--gold-line);
+  contain: paint;
+  isolation: isolate;
+  touch-action: pan-y;
 }
 .reviews__track {
   display: flex; transition: transform .5s var(--ease);
   will-change: transform;
+  width: 100%;
 }
 .review {
-  flex: 0 0 100%;
+  flex: 0 0 100%; min-width: 100%; max-width: 100%;
   padding: 48px;
-  background: var(--bg-card);
-  border: .8px solid var(--gold-line); border-radius: var(--radius-lg);
+  background: transparent;
+  border: 0;
   text-align: center;
 }
 .review__stars { color: var(--gold); font-size: 20px; letter-spacing: .15em; margin-bottom: 22px; }

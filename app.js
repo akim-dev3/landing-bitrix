@@ -515,48 +515,250 @@ const toast = (msg, kind = 'ok') => {
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('is-open')) close(); });
 })();
 
-/* ===== Chat widget ===== */
+/* ===== Chat widget: hierarchical quick-reply menu built from real site data ===== */
 (() => {
   const fab = $('#chatFab');
   const chat = $('#chat');
-  const close = $('#chatClose');
-  const form = $('#chatForm');
-  const input = $('#chatInput');
+  const closeBtn = $('#chatClose');
   const body = $('#chatBody');
-  if (!fab) return;
+  const actions = $('#chatActions');
+  if (!fab || !chat || !body || !actions) return;
 
-  const REPLIES = [
-    'Стоимость считаем под задачу — оставьте контакты, перезвоним.',
-    'Срок старта — 2–5 дней.',
-    'Оставьте телефон в форме ниже, мы перезвоним.',
-    'Да, делаем интеграцию с 1С под любые конфигурации.',
-    'Можем подключить телефонию и мессенджеры.',
-  ];
+  // Menu tree — each node = { id, label, reply?, actions?[] }
+  // reply — text bot posts when user picks this node
+  // actions — buttons shown after reply (leaf = only Back/Contact)
+  const MENU = {
+    root: {
+      greeting: 'Здравствуйте! Я подскажу по услугам и стоимости. Выберите тему:',
+      actions: [
+        { id: 'services',    label: 'Услуги — что делаем?' },
+        { id: 'pricing',     label: 'Стоимость и тарифы' },
+        { id: 'timeline',    label: 'Сроки внедрения' },
+        { id: 'integrations',label: 'Интеграции (1С, телефония…)' },
+        { id: 'start',       label: 'С чего начать?' },
+        { id: 'contact',     label: 'Оставить заявку', kind: 'primary' },
+      ],
+    },
+    // ─── Услуги ───────────────────────────────────
+    services: {
+      reply: 'У нас 12 направлений. Выберите категорию:',
+      actions: [
+        { id: 'services.crm',  label: 'CRM: внедрение, воронки, автоматизация' },
+        { id: 'services.dev',  label: 'Разработка: сайты, приложения, боты' },
+        { id: 'services.intg', label: 'Интеграции с внешними системами' },
+        { id: 'services.bi',   label: 'BI-аналитика и отчёты' },
+        { id: 'services.ops',  label: 'Портал, каталог, обучение' },
+        { id: 'root',          label: '← В меню', kind: 'ghost' },
+      ],
+    },
+    'services.crm': {
+      reply: 'Внедряем CRM (Bitrix24, amoCRM), настраиваем воронки продаж под ваши процессы, автоматизируем рутину роботами и триггерами, обучаем сотрудников.',
+      actions: [
+        { id: 'pricing.start', label: 'Стоимость внедрения CRM' },
+        { id: 'timeline',      label: 'Сроки' },
+        { id: 'contact',       label: 'Оставить заявку', kind: 'primary' },
+        { id: 'services',      label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    'services.dev': {
+      reply: 'Делаем корпоративные сайты, интернет-магазины, лендинги, мобильные и веб-приложения (iOS/Android, PWA), Telegram-боты и TG-приложения — всё с подключением к CRM.',
+      actions: [
+        { id: 'contact',   label: 'Оставить заявку', kind: 'primary' },
+        { id: 'services',  label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    'services.intg': {
+      reply: 'Связываем CRM с сайтом, Авито, маркетплейсами, 1С, телефонией, мессенджерами (WhatsApp, TG, Instagram) и любыми API.',
+      actions: [
+        { id: 'integrations', label: 'Подробнее по интеграциям' },
+        { id: 'contact',      label: 'Оставить заявку', kind: 'primary' },
+        { id: 'services',     label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    'services.bi': {
+      reply: 'Настраиваем сквозную аналитику, KPI-дашборды по отделам, отчёты руководителю — в связке с CRM. Всё прозрачно и в реальном времени.',
+      actions: [
+        { id: 'contact',   label: 'Оставить заявку', kind: 'primary' },
+        { id: 'services',  label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    'services.ops': {
+      reply: 'Внутренний портал компании, структурирование каталога товаров (с 1С/импортом), обучение сотрудников — тренинги по ролям, видео, база знаний.',
+      actions: [
+        { id: 'contact',   label: 'Оставить заявку', kind: 'primary' },
+        { id: 'services',  label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    // ─── Стоимость ────────────────────────────────
+    pricing: {
+      reply: 'У нас 3 тарифа. Стоимость финально считаем под задачу — базовые ориентиры:',
+      actions: [
+        { id: 'pricing.start', label: 'Старт — от 49 000 ₽' },
+        { id: 'pricing.biz',   label: 'Бизнес — от 149 000 ₽ (популярный)' },
+        { id: 'pricing.corp',  label: 'Корпоративный — по запросу' },
+        { id: 'pricing.why',   label: 'От чего зависит цена?' },
+        { id: 'root',          label: '← В меню', kind: 'ghost' },
+      ],
+    },
+    'pricing.start': {
+      reply: 'Тариф «Старт» — от 49 000 ₽. Базовая настройка CRM для малого бизнеса: воронка, поля, роли, обучение до 3 человек, поддержка 2 недели.',
+      actions: [
+        { id: 'contact',  label: 'Обсудить проект', kind: 'primary' },
+        { id: 'pricing',  label: '← К тарифам', kind: 'ghost' },
+      ],
+    },
+    'pricing.biz': {
+      reply: 'Тариф «Бизнес» — от 149 000 ₽. Полное внедрение: всё из «Старта» + интеграция с 1С и сайтом, бизнес-процессы и триггеры, мессенджеры и Авито, обучение до 10 человек, поддержка 1 месяц.',
+      actions: [
+        { id: 'contact',  label: 'Обсудить проект', kind: 'primary' },
+        { id: 'pricing',  label: '← К тарифам', kind: 'ghost' },
+      ],
+    },
+    'pricing.corp': {
+      reply: 'Корпоративный тариф — по запросу. Индивидуальный проект для холдинга или производства: всё из «Бизнеса» + кастомная разработка, BI-аналитика, внутренний портал.',
+      actions: [
+        { id: 'contact',  label: 'Обсудить проект', kind: 'primary' },
+        { id: 'pricing',  label: '← К тарифам', kind: 'ghost' },
+      ],
+    },
+    'pricing.why': {
+      reply: 'Итоговая цена зависит от: количества пользователей, сложности воронок и бизнес-процессов, набора интеграций (1С, телефония, маркетплейсы), объёма обучения и срока поддержки. Оставьте заявку — рассчитаем под ваш кейс.',
+      actions: [
+        { id: 'contact',  label: 'Рассчитать', kind: 'primary' },
+        { id: 'pricing',  label: '← К тарифам', kind: 'ghost' },
+      ],
+    },
+    // ─── Сроки ────────────────────────────────────
+    timeline: {
+      reply: 'Сроки зависят от объёма: базовая настройка CRM — 2–5 дней, полное внедрение — от 2 недель, крупные проекты — 1–3 месяца. Точный срок называем после аудита задач.',
+      actions: [
+        { id: 'contact',  label: 'Получить оценку', kind: 'primary' },
+        { id: 'root',     label: '← В меню', kind: 'ghost' },
+      ],
+    },
+    // ─── Интеграции ───────────────────────────────
+    integrations: {
+      reply: 'Что интегрируем? Выберите:',
+      actions: [
+        { id: 'int.1c',     label: '1С (любые конфигурации)' },
+        { id: 'int.phone',  label: 'Телефония (SIP, АТС, запись)' },
+        { id: 'int.messng', label: 'WhatsApp / Telegram / Instagram' },
+        { id: 'int.avito',  label: 'Авито и маркетплейсы' },
+        { id: 'int.site',   label: 'Сайт, формы, сторонние API' },
+        { id: 'root',       label: '← В меню', kind: 'ghost' },
+      ],
+    },
+    'int.1c': {
+      reply: 'Интегрируем с 1С в обе стороны по любой конфигурации: клиенты, контрагенты, документы и счета, остатки и цены, заказы. Работаем как с облачной, так и с коробочной CRM.',
+      actions: [
+        { id: 'contact',      label: 'Обсудить интеграцию', kind: 'primary' },
+        { id: 'integrations', label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    'int.phone': {
+      reply: 'Подключаем виртуальную АТС, SIP-операторов, распределение звонков по менеджерам, запись и аналитику разговоров — всё связано с карточками клиентов в CRM.',
+      actions: [
+        { id: 'contact',      label: 'Подключить телефонию', kind: 'primary' },
+        { id: 'integrations', label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    'int.messng': {
+      reply: 'Подключаем мессенджеры (WhatsApp Business, Telegram, Instagram Direct) к открытым линиям CRM. Все переписки — в одном окне менеджера с историей клиента.',
+      actions: [
+        { id: 'contact',      label: 'Подключить мессенджеры', kind: 'primary' },
+        { id: 'integrations', label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    'int.avito': {
+      reply: 'Подключаем Авито (сообщения и лиды напрямую в CRM), Wildberries, Ozon, Яндекс.Маркет — заявки и остатки синхронизируются с CRM автоматически.',
+      actions: [
+        { id: 'contact',      label: 'Обсудить', kind: 'primary' },
+        { id: 'integrations', label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    'int.site': {
+      reply: 'Интегрируем формы сайта (заявки моментально в воронку CRM), сторонние API, платёжные шлюзы, службы доставки — всё, что нужно вашему бизнесу.',
+      actions: [
+        { id: 'contact',      label: 'Обсудить', kind: 'primary' },
+        { id: 'integrations', label: '← Назад', kind: 'ghost' },
+      ],
+    },
+    // ─── С чего начать ───────────────────────────
+    start: {
+      reply: 'Всё просто: оставьте заявку — проведём бесплатную консультацию, изучим ваш бизнес и подготовим план работ с оценкой сроков и стоимости. Никаких обязательств.',
+      actions: [
+        { id: 'contact',  label: 'Получить консультацию', kind: 'primary' },
+        { id: 'root',     label: '← В меню', kind: 'ghost' },
+      ],
+    },
+    // ─── Оставить заявку (leaf, ведёт к попапу/форме) ─
+    contact: {
+      reply: 'Отлично! Прокручу вас к форме заявки — заполните имя и телефон, свяжемся в течение 15 минут.',
+      onEnter: () => {
+        setTimeout(() => {
+          chat.classList.remove('is-open');
+          chat.setAttribute('aria-hidden', 'true');
+          const cta = document.getElementById('cta');
+          if (cta) cta.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const fName = document.getElementById('fName');
+          if (fName) setTimeout(() => fName.focus(), 700);
+        }, 900);
+      },
+      actions: [
+        { id: 'root',  label: '← В меню', kind: 'ghost' },
+      ],
+    },
+  };
+
+  const addMsg = (text, mine = false) => {
+    const m = document.createElement('div');
+    m.className = 'msg ' + (mine ? 'msg--me' : 'msg--bot');
+    m.textContent = text;
+    body.appendChild(m);
+    body.scrollTop = body.scrollHeight;
+    return m;
+  };
+
+  const renderActions = (items) => {
+    actions.innerHTML = '';
+    items.forEach(it => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chat-btn' + (it.kind === 'primary' ? ' chat-btn--primary' :
+                                  it.kind === 'ghost' ? ' chat-btn--ghost' : '');
+      b.textContent = it.label;
+      b.addEventListener('click', () => goto(it.id, it.label));
+      actions.appendChild(b);
+    });
+  };
+
+  const goto = (nodeId, userLabel) => {
+    const node = MENU[nodeId];
+    if (!node) return;
+    if (userLabel) addMsg(userLabel, true);
+    setTimeout(() => {
+      if (node.greeting) addMsg(node.greeting);
+      if (node.reply)    addMsg(node.reply);
+      renderActions(node.actions || []);
+      if (typeof node.onEnter === 'function') node.onEnter();
+    }, userLabel ? 400 : 0);
+  };
+
+  const reset = () => {
+    body.innerHTML = '';
+    actions.innerHTML = '';
+    goto('root');
+  };
 
   fab.addEventListener('click', () => {
-    const open = chat.classList.toggle('is-open');
-    chat.setAttribute('aria-hidden', !open);
-    if (open) setTimeout(() => input.focus(), 200);
+    const wasOpen = chat.classList.contains('is-open');
+    chat.classList.toggle('is-open', !wasOpen);
+    chat.setAttribute('aria-hidden', wasOpen ? 'true' : 'false');
+    if (!wasOpen && !body.children.length) reset();
   });
-  close.addEventListener('click', () => { chat.classList.remove('is-open'); chat.setAttribute('aria-hidden', 'true'); });
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const v = input.value.trim();
-    if (!v) return;
-    const m = document.createElement('div');
-    m.className = 'msg msg--me';
-    m.textContent = v; // textContent — без HTML-инъекций
-    body.appendChild(m);
-    input.value = '';
-    body.scrollTop = body.scrollHeight;
-    setTimeout(() => {
-      const r = document.createElement('div');
-      r.className = 'msg msg--bot';
-      r.textContent = REPLIES[Math.floor(Math.random() * REPLIES.length)];
-      body.appendChild(r);
-      body.scrollTop = body.scrollHeight;
-    }, 700);
+  closeBtn.addEventListener('click', () => {
+    chat.classList.remove('is-open');
+    chat.setAttribute('aria-hidden', 'true');
   });
 })();
 

@@ -35,6 +35,14 @@ img, svg { display: block; max-width: 100%; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 4px; }
 ::selection { background: var(--gold); color: #0b0b0b; }
 
+/* ===== Scrollbars — themed to match the site everywhere ===== */
+* { scrollbar-width: thin; scrollbar-color: var(--gold-soft) var(--bg-soft); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-soft); }
+::-webkit-scrollbar-thumb { background: var(--gold-soft); border-radius: 10px; border: 2px solid var(--bg-soft); background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+::-webkit-scrollbar-corner { background: var(--bg-soft); }
+
 /* ===== Skip-link ===== */
 .skip-link {
   position: absolute; top: -100px; left: 16px; z-index: 9999;
@@ -938,7 +946,14 @@ a.contacts__val:hover { color: var(--gold); }
   background: none; border: none; color: var(--text-dim); cursor: pointer;
   font-size: 24px; line-height: 1;
 }
-.chat__body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.chat__body {
+  flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+  scrollbar-width: thin; scrollbar-color: var(--gold-soft) transparent;
+}
+.chat__body::-webkit-scrollbar { width: 6px; }
+.chat__body::-webkit-scrollbar-track { background: transparent; }
+.chat__body::-webkit-scrollbar-thumb { background: var(--gold-soft); border: none; border-radius: 3px; }
+.chat__body::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 .msg {
   padding: 10px 14px; border-radius: 14px; max-width: 80%; font-size: 14px;
   animation: msgIn .3s var(--ease);
@@ -951,6 +966,7 @@ a.contacts__val:hover { color: var(--gold); }
   display: flex; flex-wrap: wrap; gap: 8px;
   padding: 12px; border-top: 1px solid var(--gold-line);
   max-height: 220px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--gold-soft) transparent;
 }
 .chat__actions:empty { display: none; }
 .chat-btn {
@@ -970,8 +986,10 @@ a.contacts__val:hover { color: var(--gold); }
   background: transparent; color: var(--text-dim); border-color: var(--gold-line);
 }
 .chat-btn--ghost:hover { color: var(--text); }
-.chat__actions::-webkit-scrollbar { width: 4px; }
-.chat__actions::-webkit-scrollbar-thumb { background: var(--gold-soft); border-radius: 2px; }
+.chat__actions::-webkit-scrollbar { width: 6px; }
+.chat__actions::-webkit-scrollbar-track { background: transparent; }
+.chat__actions::-webkit-scrollbar-thumb { background: var(--gold-soft); border: none; border-radius: 3px; }
+.chat__actions::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
 /* ===== Toasts ===== */
 .toasts {
@@ -1013,7 +1031,12 @@ a.contacts__val:hover { color: var(--gold); }
   transform: translateY(20px) scale(.96);
   transition: transform .35s var(--ease);
   max-height: calc(100vh - 160px); overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--gold-soft) transparent;
 }
+.modal__panel::-webkit-scrollbar { width: 6px; }
+.modal__panel::-webkit-scrollbar-track { background: transparent; }
+.modal__panel::-webkit-scrollbar-thumb { background: var(--gold-soft); border: none; border-radius: 3px; }
+.modal__panel::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 .modal.is-open .modal__panel { transform: translateY(0) scale(1); }
 .modal__close {
   position: absolute; top: 12px; right: 14px;
@@ -1051,7 +1074,12 @@ a.contacts__val:hover { color: var(--gold); }
   box-shadow: 0 40px 80px -20px rgba(0,0,0,.8), 0 0 60px -10px rgba(212,175,55,.3);
   text-align: center;
   max-height: calc(100vh - 120px); overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--gold-soft) transparent;
 }
+.popup__panel::-webkit-scrollbar { width: 6px; }
+.popup__panel::-webkit-scrollbar-track { background: transparent; }
+.popup__panel::-webkit-scrollbar-thumb { background: var(--gold-soft); border: none; border-radius: 3px; }
+.popup__panel::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 .popup.is-open .popup__panel { transform: translateY(0) scale(1); }
 .popup__close {
   position: absolute; top: 12px; right: 14px;
